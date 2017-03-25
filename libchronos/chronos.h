@@ -60,6 +60,7 @@
 /* Scheduler - behaviors for each flag may or may not be defined */
 #define SCHED_RT_FIFO 			0x0000
 #define SCHED_RT_RMA 			0x0100
+#define SCHED_RT_EDF 			0x0200
 #define SCHED_RT_GFIFO			0x8000
 #define SCHED_RT_GRMA			0x8100
 
