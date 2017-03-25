@@ -1,0 +1,3 @@
+*.o
+/clear_schedstats
+/libchronos.so.3
