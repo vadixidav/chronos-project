@@ -1,3 +1,4 @@
 *.o
+*.d
 /clear_schedstats
 /libchronos.so.3
