@@ -1,0 +1,212 @@
+Readme for sched_test_app
+Originally written by Matthew Dellinger <mdelling@vt.edu>, January 21, 2010
+Portions written and modified by Aaron Lindsay <aaron@aclindsay.com>, November
+23, 2011
+
+Copyright 2008-2010 by Matthew Dellinger.
+Copyright 2011-2012 by Aaron Lindsay.
+
+Redistribution of this README file and the associated sched_test_app is
+permitted under the GNU Public License, version 2. Please see the COPYING file
+for more license details.
+
+
+Table of Contents
+~~~~~~~~~~~~~~~~~
+1. General Information
+2. Known Bugs
+3. Interface Options
+3.1. Scheduling Algorithm
+3.2. Locking
+3.3. Run Properties
+3.3.1. Workloads
+3.3.2. Timing Methods
+3.4. Taskset
+4. Setup
+5. Update History
+
+
+1. General Information
+~~~~~~~~~~~~~~~~~~~~~
+sched_test_app is a scheduling algorithm test application for use with the
+ChronOS Linux scheduling framework. It generates a series of periodic threads
+which are given real-time Linux priorities and records statistics about each
+thread, as well as their performance as a whole.
+
+2. Known Bugs
+~~~~~~~~~~~~~~~~~~~~~
+None
+
+3. Interface Options
+~~~~~~~~~~~~~~~~~~~~~
+The interface options are divided up into several groups.
+
+The interface is exposed via a simple console program. Running the compiled
+binary with any arguments will print basic help information to the console.
+
+3.1 Scheduling Algorithm
+~~~~~~~~~~~~~~~~~~~~~
+This panel contains the interface for selecting a scheduling algorithm. The
+algorithm is selectable via the top combobox.
+
+The options below the combobox are flags sent to the kernel scheduler which
+affect the behaviour of a given algorithm. If you are using this application in
+ECE 4550 or ECE 5550, you do not need to worry about these.
+
+Abort tasks on idle will run aborted tasks only when there are no other
+real-time tasks to be run. This incurs a higher memory and scheduling overhead,
+but decreases the amount of time spent executing non-utility accruing tasks and
+minimizes context switches.
+
+Use HUA handlers will create HUA abort handlers for any task that has an abort
+handler utility defined in the task set description file. The handler's deadline
+is always infinite. If no handler utility is present for a task, it will be
+aborted as normal by the kernel.
+
+Use PI enables priority inheritance if the algorithm supports it. This option
+does nothing if the algorithm does not support PI or if the algorithm has
+another resource management scheme (such as DASA).
+
+Deadlock prevention prevents deadlocks from occuring in resource algorithms
+like PI. This generally incurs a higher scheduling overhead. This does nothing
+if the algorithm already has a deadlock prevention mechanism (like DASA).
+
+3.2 Locking
+~~~~~~~~~~~~~~~~~~~~~
+Resources will only be used if locking is enabled. When it is enabled, all
+locks listed in the task set descriptor file will be locked, and the task will
+then execute the workload for the critical section length. All locks will then
+be released, and the workload will be executed for the remainder of its
+execution
+time.
+
+3.3 Run Properties
+~~~~~~~~~~~~~~~~~~~~~
+Execution time specifies the length of the run in seconds. This should always be
+a multiple of the task set period.
+
+CPU usage specifies the amount of processor usage to use for the run. Modifying
+this changes the execution time of the task.
+
+End usage and Iteration: When doing a batch run, these specify the end processor
+usage and the step size.
+
+Excel or Gnuplot output format the output appropriately for input to those
+programs.
+
+Verbose output lists every action of every task, rather than just the final
+results. This is currently unstable due to the lack of thread-safety in streams.
+
+Log to file will log the output to an automatically named file at the end of
+every run. When used in conjunction with a batch run, this will output between
+every iteration.
+
+3.3.1  Workloads
+~~~~~~~~~~~~~~~~~~~~~
+
+There are currently three workloads available for running in the sched_test_app.
+These are "burn_loop", "array_walk", "array_backwards", "array_random",
+"linked_list", and "bst".
+
+The "burn_loop" workload is the default and simply loops while incrementing an
+integer counter.
+
+The "array_walk" workload walks an array in 64 byte chunks. This is because 64
+bytes is a typical cache line
+
+The "array_backwards" workload walks an array backwards in 64 byte chunks. This
+is because 64 bytes is a typical cache line
+
+The "array_random" workload accesses array elements in random order.
+
+The "linked_list" workload initializes a linked list with elements with ramdom
+values, sorts them to be in order of increasing value, and then walks the list,
+incrementing each value as it goes.
+
+The "bst" workload initializes a BST with elements with ramdom values, and then
+searches the BST for random values, incrementing a value when it reaches the
+element for which it is searching.
+
+3.3.2  Timing Methods
+~~~~~~~~~~~~~~~~~~~~~
+For each of the workloads, we must have a mechanism of controlling how long each
+thread will run for, otherwise we have no way to enforce that each occurrence of
+a task actually takes 'usage' microseconds to run.
+
+The sched_test_app has three such methods implemented: the average-case
+iteration-count, worst-case iteration-count, and timer-polling methods.
+Worst-case iteration-count is the default timing method.
+
+The average-case iteration-count method works by using a 'slope' value. This
+slope is essentially the number of iterations of the workload that should be
+executed on a particular platform to make the workload run for, on average, one
+second. Once the slope is found, we can multiply or divide it by the appropriate
+amounts to run the task for fractions or multiples of a second. The slope is
+found by executing the workload lots of times up front and adjusting the slope
+until it produces a distribution of executions whose execution times average out
+to one second.
+
+The worst-case iteration-count method is similar to the average-case one, except
+the slope in this case is defined as and calculated to be the highest number of
+iterations which will not cause us to execute for longer than one second.
+
+The timer-polling method does not make use of a 'slope'. Instead, it loops,
+running the workload for very small increments of time, and between each run of
+the workload it polls a timer to ensure that we have not blown our deadline.
+
+3.4 Taskset Files
+~~~~~~~~~~~~~~~~~~~~~
+The taskset file specifies everything sched_test_app needs to know about the
+individual tasks it will run. The format of this file is that there will be a
+line which specifies the number of locks the tasks in the taskset will use
+(line starting with "L"), then has a list of each of the tasks which make up
+the taskset. Each task line must start with "T" and contain the processors the
+task is allowed to run on, the thread group of the task, the working set size of
+the task, the period and usage of the task (both in microseconds), and the
+utility of the task. The usage is the actual processor usage if the processor
+usage is specified as 100% on the command line; otherwise it is scaled
+appropriately. The 'Locks' and 'HUA Utility' are optional entries which may be
+added to the end of the lines.
+
+There are optionally thread group lines (beginning with "G") after the task
+lines. These lines are not required if you want to accept the default values for
+the thread groups (i.e. WSS of 128k). It is legal to supply information for some
+of the thread groups used in the task lines but not others. Those which are not
+specified will simply use the default values.
+
+A sample taskset with five tasks and five locks is shown below:
+
+#the number of locks
+L	5
+#The tasks
+#	CPUs	Thread group	Task WSS (b)	Period (us)	Usage (us)	Utility		Locks	HUA Utility
+T	all	3		131072		500000		150000		17		2,3	2
+T	0	1		131072		1000000		230000		4		1,4	2
+T	1,2	2		786432		1500000		410000		24		0,2	2
+T	0,2,3	2		786432		3000000		300000		39		4,0	2
+T	0	1		32768		5000000		500000		18		1,3	2
+#The thread groups
+#	Group #		Group WSS (b)
+G	1		131072
+G	2		65536
+
+4. Setup
+~~~~~~~~~~~~~~~~~~~~~
+To compile sched_test_app, simply run
+ $ make
+in the current directory.
+
+To install, run
+ $ sudo make install
+
+Finally, to run the application execute
+ $ sudo sched_test_app
+This command, by itself, will display usage information and exit.
+
+5. Update History
+~~~~~~~~~~~~~~~~~~~~~
+Written by Matthew Dellinger <mdelling@vt.edu>, January 21, 2010
+Updated by Matthew Dellinger <mdelling@vt.edu>, May 18, 2010
+Updated by Matthew Dellinger <mdelling@vt.edu>, July 22, 2010
+Updated by Aaron Lindsay <aaron@aclindsay.com>, November 23, 2011
+Updated by Aaron Lindsay <aaron@aclindsay.com>, February 14-15, 2012

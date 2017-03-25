@@ -1,0 +1,4 @@
+*.d
+*.o
+/find_slopes
+/sched_test_app
