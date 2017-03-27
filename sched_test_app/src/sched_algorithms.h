@@ -35,11 +35,12 @@ struct algorithm {
  * The list of all the possibile scheduling algorithms, complete with their
  * names and constants.
  */
-#define NUM_ALGORITHMS 17
+#define NUM_ALGORITHMS 18
 static struct algorithm algorithms[] = {
 	{SCHED_RT_FIFO, "FIFO"},
 	{SCHED_RT_RMA, "RMA"},
 	{SCHED_RT_EDF, "EDF"},
+	{SCHED_RT_HVDF, "HVDF"},
 	{SCHED_RT_GFIFO, "GFIFO"},
 	{SCHED_RT_GRMA, "GRMA"},
 };
