@@ -62,6 +62,8 @@
 #define SCHED_RT_RMA 			0x0100
 #define SCHED_RT_EDF 			0x0200
 #define SCHED_RT_HVDF 			0x0300
+#define SCHED_RT_RMA_ICPP 		0x0400
+#define SCHED_RT_RMA_OCPP 		0x0500
 #define SCHED_RT_GFIFO			0x8000
 #define SCHED_RT_GRMA			0x8100
 
