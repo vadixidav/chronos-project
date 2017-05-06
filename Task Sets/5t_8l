@@ -1,0 +1,8 @@
+#the number of locks
+L	8
+#	CPUs	Thread group	Task WSS (b)	Period (us)	Usage (us)	Utility		Locks	HUA Utility
+T	0	1		0		500000		150000		17		0,2,3,7	3
+T	0	1		0		1000000		227000		4		1,4,5,6	3
+T	0	1		0		1500000		410000		24		0,1,6,7	3
+T	0	1		0		3000000		299000		39		0,3,4,5	3
+T	0	1		0		5000000		500000		18		1,2,4,6	3

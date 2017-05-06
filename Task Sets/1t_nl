@@ -1,0 +1,5 @@
+#the number of locks
+L	0
+#The tasks
+#	CPUs	Thread group	Task WSS (b)	Period (us)	Usage (us)	Utility		Locks	HUA Utility
+T	0	1		0		10000000	10000000	18			2
